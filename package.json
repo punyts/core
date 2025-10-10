@@ -1,29 +1,36 @@
 {
-  "name": "@punyts/core",
-  "version": "1.0.0",
-  "publishConfig": {
-    "access": "public"
-  },
-  "type": "module",
-  "description": "A repository of utilities",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "clean": "tsc -b tsconfig.json --clean && node -e \"try{require('fs').rmSync('dist',{recursive:true,force:true})}catch{}\"",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
-    "build": "npm run typecheck && tsc -p tsconfig.json",
-    "build:watch": "tsc -p tsconfig.json -w",
-    "dev": "npm run build:watch",
-    "test": "echo \"(no tests)\""
-  },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
-    "ts-jest": "^29.4.4",
-    "typescript": "^5.9.3"
-  }
+    "name": "@punyts/core",
+    "version": "1.0.0",
+    "publishConfig": {
+        "access": "public"
+    },
+    "type": "module",
+    "description": "A repository of utilities",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "clean": "tsc -b tsconfig.json --clean && node -e \"try{require('fs').rmSync('dist',{recursive:true,force:true})}catch{}\"",
+        "typecheck": "tsc -p tsconfig.build.json --noEmit",
+        "build": "npm run typecheck && tsc -p tsconfig.build.json",
+        "test": "jest",
+        "test:ci": "jest --ci",
+        "build:watch": "tsc -p tsconfig.build.json -w",
+        "dev": "npm run build:watch"
+    },
+    "exports": {
+        ".": "./dist/index.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/jest": "^30.0.0",
+        "jest": "^30.2.0",
+        "ts-jest": "^29.4.4",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "test": "^3.3.0"
+    }
 }
