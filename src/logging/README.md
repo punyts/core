@@ -13,28 +13,6 @@ There are several built-in categories that can be called instead of the generic 
 * metric
 * state
 
-## Example Adding Console Logger
-
-Add this code to the project's `App.tsx` file to initialize and deconstruct the console logger.
-
-```
-import { useEffect } from "react";
-import ConsoleLogger from "@comptia/innovation.corets/src/logging/ConsoleLogger";
-import { setCategories } from "@comptia/innovation.corets/src/logging/Reporter";
-
-useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    //set the reporter's categories from the url
-    if (params.has(REPORTER_CATEGORIES_PARAM)) {
-        const categories = params.get(REPORTER_CATEGORIES_PARAM)?.split(",");
-        if (categories)
-            setCategories(categories);
-    }
-    //start logging
-    ConsoleLogger.startLogging();
-    //stop logging
-    return () => ConsoleLogger.stopLogging();
-}, []);
 ```
 
 ## Example Reporting Messages
@@ -42,7 +20,7 @@ useEffect(() => {
 Add `report` entries anywhere in the code, with the appropriate category.
 
 ```
-import { report } from "../logging/Reporter";
+import { report } from "@punyts/core";
 
 //report a message for a built-in category
 report.info("Some information");

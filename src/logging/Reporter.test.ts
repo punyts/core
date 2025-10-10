@@ -4,7 +4,7 @@ import {
     removeListener,
     report,
     ListenerFn
-} from './Reporter';
+} from './Reporter.js';
 
 describe('Reporter Utility', () => {
     beforeEach(() => {

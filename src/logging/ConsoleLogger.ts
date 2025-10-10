@@ -1,4 +1,4 @@
-import { addListener, removeListener } from "./Reporter";
+import { addListener, removeListener } from "./Reporter.js";
 
 export const consoleLogger = (timestamp: number, category: string, message: string, details?: any) => {
     let logFn = console.log;
