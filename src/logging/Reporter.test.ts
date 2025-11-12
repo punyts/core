@@ -1,3 +1,4 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     setCategories,
     addListener,
@@ -22,14 +23,14 @@ describe('Reporter Utility', () => {
     });
 
     it('should handle a string categories arg when adding listener', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'error');
         report.error("error message");
         expect(mockListener).toHaveBeenCalled();
     });
 
     it('should handle missing categories when adding listeners', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener);
         report.error("error message");
         expect(mockListener).toHaveBeenCalled();
@@ -48,29 +49,29 @@ describe('Reporter Utility', () => {
 
     it("should swallow error from listener handler", () => {
         // Mock console.error for this test only
-        const consoleErrorMock = jest.spyOn(console, 'error').mockImplementation(() => { });
+    const consoleErrorMock = vi.spyOn(console, 'error').mockImplementation(() => { });
 
-        const mockListener: ListenerFn = jest.fn(() => { throw new Error("Listener error") });
+    const mockListener: ListenerFn = vi.fn(() => { throw new Error("Listener error") });
         addListener(mockListener, 'info');
         report.info("Test message");
         removeListener(mockListener, 'info');
         // Assert that console.error was called
-        expect(console.error).toHaveBeenCalledWith(expect.any(Error));
-        expect((console.error as unknown as jest.SpyInstance).mock.calls[0][0].message).toBe('Listener error');
+    expect(console.error).toHaveBeenCalledWith(expect.any(Error));
+    expect((consoleErrorMock.mock.calls[0][0] as Error).message).toBe('Listener error');
 
-        consoleErrorMock.mockRestore();
+    consoleErrorMock.mockRestore();
     });
 
     it("should do nothing if the categories don't match", () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'all');
         report("event", "This message should not emit");
         expect(mockListener).not.toHaveBeenCalled();
     });
 
     it('should handle details as a function', () => {
-        const details = jest.fn();
-        const mockListener: ListenerFn = jest.fn();
+    const details = vi.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'info');
 
         report.info('Test message', details);
@@ -79,7 +80,7 @@ describe('Reporter Utility', () => {
     });
 
     it('should handle a non-string message', () => {
-        const mockListener = jest.fn();
+    const mockListener = vi.fn();
         addListener(mockListener as ListenerFn, 'info');
 
         report.info({ message: "test" } as unknown as string);
@@ -92,7 +93,7 @@ describe('Reporter Utility', () => {
     });
 
     it('should handle a details as an object', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'info');
 
         report.info("An object detail should work", { message: "test" } as unknown as string);
@@ -105,7 +106,7 @@ describe('Reporter Utility', () => {
     });
 
     it('should convert %s values in the message', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'info');
         report.info("Test message %s", ["worked"]);
         report.info("Test message %s", { worked: true });
@@ -115,14 +116,14 @@ describe('Reporter Utility', () => {
     });
 
     it('should report both error message and stack', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener);
         report.error(new Error("Test error"));
         expect(mockListener).toHaveBeenCalledTimes(2);
     });
 
     it('should removeListener correctly', () => {
-        const mockListener: ListenerFn = jest.fn();
+    const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'info');
         removeListener(mockListener);
         expect(mockListener).not.toHaveBeenCalled();
