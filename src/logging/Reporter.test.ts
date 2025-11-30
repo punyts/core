@@ -1,14 +1,23 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
-    setCategories,
-    addListener,
-    removeListener,
-    report,
-    ListenerFn
+    createReporter,
+    type ListenerFn,
+    type Reporter,
 } from './Reporter.js';
 
 describe('Reporter Utility', () => {
+    let reporter: Reporter;
+    let setCategories: Reporter['setCategories'];
+    let addListener: Reporter['addListener'];
+    let removeListener: Reporter['removeListener'];
+    let report: Reporter['report'];
+
     beforeEach(() => {
+        reporter = createReporter();
+        setCategories = reporter.setCategories;
+        addListener = reporter.addListener;
+        removeListener = reporter.removeListener;
+        report = reporter.report;
         // Reset categories and listeners before each test
         setCategories(['info', 'error', 'stack']);
     });
@@ -93,16 +102,50 @@ describe('Reporter Utility', () => {
     });
 
     it('should handle a details as an object', () => {
-    const mockListener: ListenerFn = vi.fn();
+        const mockListener: ListenerFn = vi.fn();
         addListener(mockListener, 'info');
 
-        report.info("An object detail should work", { message: "test" } as unknown as string);
-        expect(mockListener).toHaveBeenCalledWith(expect.any(Number), "info", "An object detail should work", { "message": "test" });
+        const payload = { message: 'test' };
+        report.info('An object detail should work', payload);
+        expect(mockListener).toHaveBeenCalledWith(
+            expect.any(Number),
+            'info',
+            'An object detail should work',
+            payload
+        );
 
         const circularObject: any = {};
         circularObject.self = circularObject; // Circular reference
-        report.info("An undefined detail should throw exception", circularObject);
-        expect(mockListener).toHaveBeenNthCalledWith(2, expect.any(Number), "info", "An undefined detail should throw exception", "reporter error: TypeError: Converting circular structure to JSON\n    --> starting at object with constructor 'Object'\n    --- property 'self' closes the circle")
+        report.info('Circular detail retains reference', circularObject);
+        expect(mockListener).toHaveBeenNthCalledWith(
+            2,
+            expect.any(Number),
+            'info',
+            'Circular detail retains reference',
+            circularObject
+        );
+    });
+
+    it('should snapshot details when requested', () => {
+        const mockListener: ListenerFn = vi.fn();
+        addListener(mockListener, 'info');
+
+        const payload = { count: 1 };
+        report.info('Snapshot payload', payload, undefined, true);
+
+        payload.count = 2;
+
+        const call = vi.mocked(mockListener).mock.calls[0];
+        expect(call[3]).toEqual({ count: 1 });
+        expect(call[3]).not.toBe(payload);
+
+        const circularObject: any = {};
+        circularObject.self = circularObject;
+        report.info('Snapshot circular payload', circularObject, undefined, true);
+
+        const secondCall = vi.mocked(mockListener).mock.calls[1];
+        expect(typeof secondCall[3]).toBe('string');
+        expect(secondCall[3] as string).toContain('Converting circular structure');
     });
 
     it('should convert %s values in the message', () => {

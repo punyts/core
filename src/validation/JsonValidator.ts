@@ -81,7 +81,16 @@ export function withDefaults<T>(schema: JsonSchemaDefinition, defaults: Partial<
     return clone as JsonSchema<T>;
 }
 
-function validateNode(schema: JsonSchemaDefinition, value: unknown, path: string, options: InternalValidationOptions): NodeValidationResult {
+function validateNode(
+        schema: JsonSchemaDefinition,
+        value: unknown,
+        path: string,
+        options: InternalValidationOptions
+): NodeValidationResult {
+
+
+
+
     if (value === undefined) {
         if (options.applyDefaults && schema.default !== undefined) {
             return {
@@ -120,7 +129,8 @@ function validateNode(schema: JsonSchemaDefinition, value: unknown, path: string
     if (!typeMatches(value, allowedTypes)) {
         if (allowedTypes.length === 0) {
             // Schema without explicit type accepts any value
-        } else {
+        }
+        else {
             const expected = allowedTypes.join(' or ');
             issues.push({ path, message: `Expected value of type ${expected}` });
             return { success: false, issues };
@@ -152,7 +162,15 @@ function validateNode(schema: JsonSchemaDefinition, value: unknown, path: string
     }
 }
 
-function validateString(schema: JsonSchemaDefinition, value: string, path: string): NodeValidationResult {
+function validateString(
+        schema: JsonSchemaDefinition,
+        value: string,
+        path: string
+): NodeValidationResult {
+
+
+
+
     const issues: ValidationIssue[] = [];
 
     if (schema.minLength !== undefined && value.length < schema.minLength) {
@@ -186,7 +204,15 @@ function validateString(schema: JsonSchemaDefinition, value: string, path: strin
     };
 }
 
-function validateNumber(schema: JsonSchemaDefinition, value: number, path: string): NodeValidationResult {
+function validateNumber(
+        schema: JsonSchemaDefinition,
+        value: number,
+        path: string
+): NodeValidationResult {
+
+
+
+
     const issues: ValidationIssue[] = [];
 
     if (Number.isNaN(value) || !Number.isFinite(value)) {
@@ -227,11 +253,15 @@ function validateNumber(schema: JsonSchemaDefinition, value: number, path: strin
 }
 
 function validateArray(
-    schema: JsonSchemaDefinition,
-    value: unknown[],
-    path: string,
-    options: InternalValidationOptions
+        schema: JsonSchemaDefinition,
+        value: unknown[],
+        path: string,
+        options: InternalValidationOptions
 ): NodeValidationResult {
+
+
+
+
     const issues: ValidationIssue[] = [];
 
     if (schema.minItems !== undefined && value.length < schema.minItems) {
@@ -280,12 +310,16 @@ function validateArray(
 }
 
 function validateTuple(
-    items: SchemaTuple,
-    value: unknown[],
-    path: string,
-    options: InternalValidationOptions,
-    issues: ValidationIssue[]
+        items: SchemaTuple,
+        value: unknown[],
+        path: string,
+        options: InternalValidationOptions,
+        issues: ValidationIssue[]
 ): NodeValidationResult {
+
+
+
+
     const length = items.length;
     if (value.length !== length) {
         issues.push({ path, message: `Array must contain exactly ${length} items` });
@@ -311,11 +345,16 @@ function validateTuple(
 }
 
 function validateObject(
-    schema: JsonSchemaDefinition,
-    value: Record<string, unknown>,
-    path: string,
-    options: InternalValidationOptions
+        schema: JsonSchemaDefinition,
+        value: Record<string,
+        unknown>,
+        path: string,
+        options: InternalValidationOptions
 ): NodeValidationResult {
+
+
+
+
     if (value === null || Array.isArray(value)) {
         return {
             success: false,
@@ -344,7 +383,8 @@ function validateObject(
         if (outcome.success) {
             if (outcome.value !== undefined) {
                 result[key] = outcome.value;
-            } else if (hasKey && propertyValue !== undefined) {
+            }
+            else if (hasKey && propertyValue !== undefined) {
                 result[key] = propertyValue;
             }
         }
@@ -384,11 +424,15 @@ function validateObject(
 }
 
 function handleCompositeSchemas(
-    schema: JsonSchemaDefinition,
-    value: unknown,
-    path: string,
-    options: InternalValidationOptions
+        schema: JsonSchemaDefinition,
+        value: unknown,
+        path: string,
+        options: InternalValidationOptions
 ): NodeValidationResult | undefined {
+
+
+
+
     if (schema.oneOf) {
         const outcomes = schema.oneOf.map((candidate) => validateNode(candidate, value, path, options));
         const successes = outcomes.filter((outcome) => outcome.success);
@@ -442,7 +486,13 @@ function handleCompositeSchemas(
     return undefined;
 }
 
-function normalizeTypes(type: JsonSchemaDefinition['type']): JsonPrimitiveType[] {
+function normalizeTypes(
+        type: JsonSchemaDefinition['type']
+): JsonPrimitiveType[] {
+
+
+
+
     if (!type) {
         return [];
     }
@@ -450,7 +500,14 @@ function normalizeTypes(type: JsonSchemaDefinition['type']): JsonPrimitiveType[]
     return Array.isArray(type) ? type : [type];
 }
 
-function typeMatches(value: unknown, allowed: JsonPrimitiveType[]): boolean {
+function typeMatches(
+        value: unknown,
+        allowed: JsonPrimitiveType[]
+): boolean {
+
+
+
+
     if (allowed.length === 0) {
         return true;
     }
@@ -478,7 +535,13 @@ function typeMatches(value: unknown, allowed: JsonPrimitiveType[]): boolean {
     return allowed.includes(actual);
 }
 
-function inferType(value: unknown): JsonPrimitiveType {
+function inferType(
+        value: unknown
+): JsonPrimitiveType {
+
+
+
+
     if (value === null) {
         return 'null';
     }
@@ -517,7 +580,14 @@ function deepClone<T>(value: T): T {
     return value;
 }
 
-function areEqual(a: unknown, b: unknown): boolean {
+function areEqual(
+        a: unknown,
+        b: unknown
+): boolean {
+
+
+
+
     if (a === b) {
         return true;
     }
@@ -545,26 +615,52 @@ function areEqual(a: unknown, b: unknown): boolean {
     return false;
 }
 
-function isMultipleOf(value: number, divisor: number): boolean {
+function isMultipleOf(
+        value: number,
+        divisor: number
+): boolean {
+
+
+
+
     const quotient = value / divisor;
     return Number.isInteger(quotient);
 }
 
-function isValidUri(value: string): boolean {
+function isValidUri(
+        value: string
+): boolean {
+
+
+
+
     try {
         const url = new URL(value);
         return Boolean(url.protocol) && Boolean(url.host);
-    } catch {
+    }
+    catch {
         return false;
     }
 }
 
-function isValidUuid(value: string): boolean {
+function isValidUuid(
+        value: string
+): boolean {
+
+
+
+
     const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/;
     return uuidRegex.test(value);
 }
 
-function stableStringify(value: unknown): string {
+function stableStringify(
+        value: unknown
+): string {
+
+
+
+
     if (value === null || typeof value !== 'object') {
         return JSON.stringify(value);
     }
