@@ -18,6 +18,10 @@
             "types": "./dist/logging/ConsoleLogger.d.ts",
             "default": "./dist/logging/ConsoleLogger.js"
         },
+        "./logging/FileLogger.js": {
+            "types": "./dist/logging/FileLogger.d.ts",
+            "default": "./dist/logging/FileLogger.js"
+        },
         "./logging/Reporter.js": {
             "types": "./dist/logging/Reporter.d.ts",
             "default": "./dist/logging/Reporter.js"
