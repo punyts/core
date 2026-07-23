@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
     createReporter,
-    type ListenerFn,
-    type Reporter,
 } from './Reporter.js';
+import type { ListenerFn, Reporter } from './types.js';
 
 describe('Reporter Utility', () => {
     let reporter: Reporter;
