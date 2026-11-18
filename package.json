@@ -35,7 +35,7 @@
         "test:run": "vitest run",
         "test:watch": "vitest --watch",
         "test:cov": "vitest run --coverage",
-        "build:watch": "tsc -d tsconfig.build.json -w",
+        "build:watch": "tsc -p tsconfig.build.json -w",
         "dev": "npm run build:watch"
     },
     "keywords": [],
@@ -44,8 +44,5 @@
     "devDependencies": {
         "typescript": "^5.9.3",
         "vitest": "^4.1.10"
-    },
-    "dependencies": {
-        "test": "^3.3.0"
     }
 }

@@ -13,8 +13,6 @@ There are several built-in categories that can be called instead of the generic 
 * metric
 * state
 
-```
-
 ## Example Reporting Messages
 
 Add `report` entries anywhere in the code, with the appropriate category.
@@ -39,7 +37,7 @@ report.info("Information about %s and %s", ["this","that"]);
 Loggers like the Console Logger can be created to log the messages to anywhere.
 
 ```
-import { addListener, removeListener } from "./Reporter";
+import { addListener, removeListener } from "@punyts/core";
 
 //log all reported messages
 const logger = (timestamp: number, category: string, message: string, details?: any) => console.log(message);
