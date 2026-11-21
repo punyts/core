@@ -170,4 +170,39 @@ describe('Reporter Utility', () => {
         removeListener(mockListener);
         expect(mockListener).not.toHaveBeenCalled();
     });
+it('should report a category of a family named with .*, and no category outside it', () => {
+        // Arrange
+        const listener: ListenerFn = vi.fn();
+        addListener(listener, 'stateui.*');
+        setCategories(['stateui.*']);
+
+        // Act
+        report('stateui.render', 'rendered');
+        report('stateui.repeat.reconcile', 'reconciled');
+        report('stateui-app.mount', 'mounted');
+
+        // Assert
+        expect(listener).toHaveBeenCalledTimes(2);
+        expect(listener).toHaveBeenNthCalledWith(1, expect.any(Number), 'stateui.render', 'rendered', undefined);
+        expect(listener).toHaveBeenNthCalledWith(2, expect.any(Number), 'stateui.repeat.reconcile', 'reconciled', undefined);
+    });
+
+    it('should say whether a category is reported, following the categories and the listeners', () => {
+        // Arrange
+        setCategories(['state.*']);
+
+        // Act
+        const withoutListener = reporter.isReported('state.set');
+        addListener(vi.fn(), 'all');
+        const withListener = reporter.isReported('state.set');
+        const outside = reporter.isReported('statenet.mesh');
+        setCategories(['statenet.mesh']);
+
+        // Assert
+        expect(withoutListener).toBe(false);
+        expect(withListener).toBe(true);
+        expect(outside).toBe(false);
+        expect(reporter.isReported('statenet.mesh')).toBe(true);
+        expect(reporter.isReported('state.set')).toBe(false);
+    });
 });

@@ -19,4 +19,5 @@ import { configureFileLogger, startFileLogger, stopFileLogger } from "@punyts/co
 
 configureFileLogger({ filePath: "logs/report.log", append: false });
 startFileLogger(["error", "warning"]);
+// later: await stopFileLogger(), which flushes what was written
 ```

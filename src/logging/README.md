@@ -47,3 +47,21 @@ addListener(logger);
 const errorLogger = (timestamp: number, category: string, message: string, details?: any) => console.log(message);
 addListener(errorLogger, ["error","stack"]);
 ```
+
+## Categories of the libraries
+
+The punyts libraries report under `<library>.<area>` categories (`stateui.render`, `state-sync.client`), all off by
+default. A category list may name a family with `.*`: `setCategories(["stateui.*"])` turns on every category of
+stateui, and a listener added with `"stateui.*"` takes them. `isReported(category)` says whether a report of the
+category goes out now, so a hot path can skip building its details:
+
+```
+import { isReported, report } from "@punyts/core";
+
+if (isReported("stateui.render")) {
+    report("stateui.render", "Rendered %s", [tagName]);
+}
+```
+
+Hosts turn categories on: Node hosts from `PUNYTS_REPORT` (`PUNYTS_REPORT=stateui-app.*,state-sync.*`), stateui-app's
+runtime in the browser from `localStorage["punyts.report"]`. See the workspace's `docs/design/reporting.md`.

@@ -63,6 +63,8 @@ export interface Reporter {
         categories?: string | string[]
     ) => void;
     readonly setCategories: (category: string | string[]) => void;
+    /** Whether a report of the category reaches a listener now; check it before building costly details on a hot path */
+    readonly isReported: (category: string) => boolean;
     readonly getCategories: () => string[];
     readonly clearListeners: () => void;
 }

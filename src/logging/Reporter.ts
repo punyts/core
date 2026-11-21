@@ -13,14 +13,40 @@ interface Listener {
     categories: string[];
 }
 
+/**
+ * Whether a list of categories takes a category: it names it, holds "all", or holds a family "<prefix>.*" that the
+ * category is in ("stateui.*" takes "stateui.render" and "stateui.repeat.reconcile")
+ * @param list
+ * @param category
+ */
+export function categoryMatches(list: readonly string[], category: string): boolean {
+    if (list.includes(category) || list.includes("all")) {
+        return true;
+    }
+    return list.some((entry) => entry.endsWith(".*") && category.startsWith(entry.slice(0, -1)));
+}
+
 export function createReporter(options: ReporterOptions = {}): Reporter {
     const listeners: Listener[] = [];
     let categories: string[] = options.categories
         ? [...options.categories]
         : ["info", "error", "stack"];
+    //whether each category reported so far is on, cleared when the categories change
+    let reported = new Map<string, boolean>();
 
     function setCategories(category: string | string[]) {
         categories = Array.isArray(category) ? [...category] : [category];
+        reported = new Map();
+    }
+
+    /** Whether a report of the category reaches the listeners: on a hot path, check this before building the details */
+    function isReported(category: string): boolean {
+        let on = reported.get(category);
+        if (on === undefined) {
+            on = categoryMatches(categories, category);
+            reported.set(category, on);
+        }
+        return on && listeners.length > 0;
     }
 
     function createListener(
@@ -47,10 +73,7 @@ export function createReporter(options: ReporterOptions = {}): Reporter {
         details?: unknown
     ) {
         try {
-            if (
-                listener.categories.includes(category) ||
-                listener.categories.includes("all")
-            ) {
+            if (categoryMatches(listener.categories, category)) {
                 listener.fn(timestamp, category, message, details);
             }
         }
@@ -173,13 +196,10 @@ export function createReporter(options: ReporterOptions = {}): Reporter {
         timestamp?: number,
         snapshot = false
     ): void => {
-        const effectiveTimestamp = timestamp ?? performance.now();
-        if (
-            !categories.includes(category) &&
-            !categories.includes("all")
-        ) {
+        if (!isReported(category)) {
             return;
         }
+        const effectiveTimestamp = timestamp ?? performance.now();
 
         void fireListeners(
             effectiveTimestamp,
@@ -233,6 +253,7 @@ export function createReporter(options: ReporterOptions = {}): Reporter {
         addListener,
         removeListener,
         setCategories,
+        isReported,
         getCategories: () => [...categories],
         clearListeners: () => {
             listeners.length = 0;
@@ -246,5 +267,6 @@ export const report = defaultReporter.report;
 export const addListener = defaultReporter.addListener;
 export const removeListener = defaultReporter.removeListener;
 export const setCategories = defaultReporter.setCategories;
+export const isReported = defaultReporter.isReported;
 export const getCategories = defaultReporter.getCategories;
 export const clearListeners = defaultReporter.clearListeners;

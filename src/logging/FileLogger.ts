@@ -1,4 +1,4 @@
-import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { createWriteStream, mkdirSync, type WriteStream } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { addListener, removeListener } from "./Reporter.js";
 
@@ -9,24 +9,22 @@ export interface FileLoggerConfig {
 
 let logFilePath = resolve(process.cwd(), "report.log");
 let registerCategories: string | string[] = "all";
-let isRegistered = false;
-let truncateOnStart = true;
+let append = false;
+let stream: WriteStream | undefined;
 
-const ensureLogFile = () => {
-    const directory = dirname(logFilePath);
-    if (directory && directory !== ".") {
-        mkdirSync(directory, { recursive: true });
+/** The open stream to the log file: made once, so a report costs one buffered write and never blocks on the disk */
+const openStream = (): WriteStream => {
+    if (!stream) {
+        mkdirSync(dirname(logFilePath), { recursive: true });
+        stream = createWriteStream(logFilePath, { flags: append ? "a" : "w", encoding: "utf8" });
+        stream.on("error", (error) => console.error("FileLogger failed to write log entry", error));
     }
-
-    if (!existsSync(logFilePath) || truncateOnStart) {
-        writeFileSync(logFilePath, "", { encoding: "utf8" });
-        truncateOnStart = false;
-    }
+    return stream;
 };
 
 export const configureFileLogger = (config: FileLoggerConfig) => {
     logFilePath = resolve(config.filePath);
-    truncateOnStart = !(config.append ?? false);
+    append = config.append ?? false;
 };
 
 const serializeDetails = (details?: unknown): string => {
@@ -43,31 +41,20 @@ const serializeDetails = (details?: unknown): string => {
 };
 
 export const fileLogger = (timestamp: number, category: string, message: string, details?: unknown) => {
-    ensureLogFile();
-
     const timestampStr = timestamp.toFixed(4).padStart(16, "0");
-    const line = `${timestampStr}\t${category.padEnd(20, " ")}\t${message}${serializeDetails(details)}\n`;
-
-    try {
-        appendFileSync(logFilePath, line, { encoding: "utf8" });
-    }
-    catch (error) {
-        console.error("FileLogger failed to write log entry", error);
-    }
+    openStream().write(`${timestampStr}\t${category.padEnd(20, " ")}\t${message}${serializeDetails(details)}\n`);
 };
 
 export const startFileLogger = (categories: string | string[] = "all") => {
-    ensureLogFile();
+    openStream();
     registerCategories = categories;
     addListener(fileLogger, categories);
-    isRegistered = true;
 };
 
-export const stopFileLogger = () => {
-    if (!isRegistered) {
-        return;
-    }
-
+/** Stops logging and closes the file once what was written is flushed */
+export const stopFileLogger = (): Promise<void> => {
     removeListener(fileLogger, registerCategories);
-    isRegistered = false;
+    const closing = stream;
+    stream = undefined;
+    return new Promise((done) => (closing ? closing.end(done) : done()));
 };
